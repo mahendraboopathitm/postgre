@@ -1,5 +1,5 @@
-name: mahi_ingestion
-
+bundle :
+  name: mahi_ingestion
 workspace:
   host: https://dbc-ce0ce842-10b5.cloud.databricks.com
 resources:
