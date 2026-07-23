@@ -4,3 +4,7 @@
 __pycache__/
 *.py[cod]
 .venv/
+
+# Databricks CLI's own local bundle state/cache - recreated automatically
+# by 'databricks bundle validate'/'deploy', never meant to be committed.
+.databricks/
