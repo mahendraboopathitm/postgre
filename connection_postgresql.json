@@ -1,0 +1,10 @@
+{
+  "name": "mahi_postgresql",
+  "connection_type": "POSTGRESQL",
+  "options": {
+    "host": "ep-fancy-cake-an0e07k4-pooler.c-6.us-east-1.aws.neon.tech",
+    "port": "5432",
+    "user": "__USER__",
+    "password": "__PASSWORD__"
+  }
+}

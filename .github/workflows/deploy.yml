@@ -2,7 +2,7 @@ name: Deploy ingestion pipelines
 
 on:
   push:
-    branches: ["HEAD"]
+    branches: ["main"]
 
 jobs:
   deploy:
@@ -10,20 +10,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
       - name: Install Databricks CLI
         run: curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
 
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt
-
-      - name: Deploy via Databricks Asset Bundles
-        run: python scripts/deploy.py deployments/boopathi/deployment.yaml
+      - name: Resolve and create/update connection 'mahi_postgresql'
+        run: |
+          jq --arg user "$POSTGRESQL_USER_MAHI" --arg password "$POSTGRESQL_PASSWORD_MAHI" '.options.user = $user | .options.password = $password' connection_postgresql.json > /tmp/connection_postgresql.json
+          if databricks connections get "mahi_postgresql" >/dev/null 2>&1; then
+            databricks connections update "mahi_postgresql" --json @/tmp/connection_postgresql.json
+          else
+            databricks connections create --json @/tmp/connection_postgresql.json
+          fi
         env:
-          DATABRICKS_HOST_BOOPATHI: ${{ secrets.DATABRICKS_HOST_BOOPATHI }}
-          DATABRICKS_TOKEN_BOOPATHI: ${{ secrets.DATABRICKS_TOKEN_BOOPATHI }}
-          POSTGRESQL_USER_BOOPATHI: ${{ secrets.POSTGRESQL_USER_BOOPATHI }}
-          POSTGRESQL_PASSWORD_BOOPATHI: ${{ secrets.POSTGRESQL_PASSWORD_BOOPATHI }}
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_MAHI }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_MAHI }}
+          POSTGRESQL_USER_MAHI: ${{ secrets.POSTGRESQL_USER_MAHI }}
+          POSTGRESQL_PASSWORD_MAHI: ${{ secrets.POSTGRESQL_PASSWORD_MAHI }}
+
+      - name: databricks bundle validate
+        run: databricks bundle validate
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_MAHI }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_MAHI }}
+
+      - name: databricks bundle deploy
+        run: databricks bundle deploy
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST_MAHI }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_MAHI }}
