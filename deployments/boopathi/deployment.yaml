@@ -1,0 +1,32 @@
+customer:
+  name: boopathi
+  workspace_url: https://dbc-ce0ce842-10b5.cloud.databricks.com
+  catalog: ingest_framework
+  schema: bronze
+  secret_scope: boopathi_secrets
+connectors:
+- name: postgresql
+  connection_name: boopathi_postgresql
+  kind: official
+  auth_mode: automated
+  connection_type: POSTGRESQL
+  source_type: POSTGRESQL
+  gateway: true
+  connection_options:
+    host: ep-fancy-cake-an0e07k4-pooler.c-6.us-east-1.aws.neon.tech
+    port: '5432'
+    database: neondb
+    sslmode: Required
+  source_configuration:
+    slot_name: databricks_slot
+    publication_name: databricks_publication
+  env_credentials:
+  - user
+  - password
+  tables:
+  - source_schema: public
+    source_table: orders
+    destination_schema: postgresql_ingestion
+  - source_schema: public
+    source_table: customers
+    destination_schema: postgresql_ingestion

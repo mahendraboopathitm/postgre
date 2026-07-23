@@ -1,0 +1,29 @@
+name: Deploy ingestion pipelines
+
+on:
+  push:
+    branches: ["HEAD"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Databricks CLI
+        run: curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Deploy via Databricks Asset Bundles
+        run: python scripts/deploy.py deployments/boopathi/deployment.yaml
+        env:
+          DATABRICKS_HOST_BOOPATHI: ${{ secrets.DATABRICKS_HOST_BOOPATHI }}
+          DATABRICKS_TOKEN_BOOPATHI: ${{ secrets.DATABRICKS_TOKEN_BOOPATHI }}
+          POSTGRESQL_USER_BOOPATHI: ${{ secrets.POSTGRESQL_USER_BOOPATHI }}
+          POSTGRESQL_PASSWORD_BOOPATHI: ${{ secrets.POSTGRESQL_PASSWORD_BOOPATHI }}
