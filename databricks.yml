@@ -1,8 +1,7 @@
 name: mahi_ingestion
 
 workspace:
-  host: ${{ secrets.DATABRICKS_HOST_MAHI }}
-
+  host: ${DATABRICKS_HOST}
 resources:
   pipelines:
     postgresql_ingestion:
