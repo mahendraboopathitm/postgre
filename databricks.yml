@@ -1,47 +1,41 @@
-bundle:
-  name: mahi_ingestion
+name: mahi_ingestion
+
 workspace:
-  host: https://dbc-ce0ce842-10b5.cloud.databricks.com
+  host: ${{ secrets.DATABRICKS_HOST_MAHI }}
+
 resources:
   pipelines:
-    postgresql_gateway:
-      name: mahi_postgresql_gateway
-      catalog: ingest_framework
-      schema: bronze
-      gateway_definition:
-        connection_name: mahi_postgresql
-        gateway_storage_catalog: ingest_framework
-        gateway_storage_schema: bronze
-        gateway_storage_name: postgresql_gateway
     postgresql_ingestion:
       name: mahi_postgresql_ingestion
       catalog: ingest_framework
       schema: bronze
+      # Mandated for Free/Community Edition Serverless runtime
+      serverless: true 
+      
       ingestion_definition:
-        ingestion_gateway_id: ${resources.pipelines.postgresql_gateway.id}
+        connection_name: mahi_postgresql
         source_type: POSTGRESQL
         objects:
         - table:
+            source_catalog: neondb
+            source_schema: public
+            source_table: orders
             destination_catalog: ingest_framework
             destination_schema: postgresql_ingestion
             destination_table: orders
-            source_schema: public
-            source_table: orders
-            source_catalog: neondb
+            # Empty table_configuration forces Lakeflow Connect to perform a FULL LOAD
+            table_configuration: {}
+            
         - table:
+            source_catalog: neondb
+            source_schema: public
+            source_table: customers
             destination_catalog: ingest_framework
             destination_schema: postgresql_ingestion
             destination_table: customers
-            source_schema: public
-            source_table: customers
-            source_catalog: neondb
-        source_configurations:
-        - catalog:
-            source_catalog: neondb
-            postgres:
-              slot_config:
-                slot_name: databricks_slot
-                publication_name: databricks_publication
+            # Empty table_configuration forces Lakeflow Connect to perform a FULL LOAD
+            table_configuration: {}
+
   jobs:
     postgresql_refresh:
       name: mahi_postgresql_refresh
