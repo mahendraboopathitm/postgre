@@ -2,7 +2,7 @@ name: Deploy ingestion pipelines
 
 on:
   push:
-    branches: ["HEAD"]
+    branches: ["main"]
 
 jobs:
   deploy:
